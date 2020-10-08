@@ -1,6 +1,14 @@
 name: NanoPi R2S OpenWrt
 
-on: repository_dispatch
+on:
+
+#  push:
+#    branches:
+#      - openwrt-master
+#  schedule:
+#    - cron: 20 02 * * *
+  watch:
+    types: [started]
 
 jobs:
   OpenWrt-18_06:
@@ -64,11 +72,6 @@ jobs:
       with:
         name: openwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
         path: /home/runner/openwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
-    - name: Upload OpenWrt-18.06 Firmwares to Cloud
-      timeout-minutes: 30
-      run: |
-        cd "/home/runner"
-        ${GITHUB_WORKSPACE}/scripts/upload_firmware.sh "18.06" "${{ secrets.TELEGRAM_BOT_TOKEN }}" || exit 0
   OpenWrt-Snapshot:
     runs-on: ubuntu-18.04
     steps:
@@ -130,17 +133,3 @@ jobs:
       with:
         name: openwrt-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
         path: /home/runner/openwrt-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz
-    - name: Upload OpenWrt-Snapshot Firmwares to Cloud
-      timeout-minutes: 30
-      run: |
-        cd "/home/runner"
-        ${GITHUB_WORKSPACE}/scripts/upload_firmware.sh "snapshot" "${{ secrets.TELEGRAM_BOT_TOKEN }}" || exit 0
-  Cleanup-Old-Artifacts:
-    needs: [OpenWrt-18_06,OpenWrt-Snapshot]
-    runs-on: ubuntu-18.04
-    steps:
-    - name: Cleanup Old Action Artifacts
-      uses: kolpav/purge-artifacts-action@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        expire-in: 1d
